@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.algalog.api.assembler.ClienteAssembler;
+import com.dev.algalog.api.model.ClienteModel;
+import com.dev.algalog.api.model.input.ClienteInput;
 import com.dev.algalog.domain.model.Cliente;
 import com.dev.algalog.domain.repository.ClienteRepository;
 import com.dev.algalog.domain.service.ClienteService;
@@ -29,35 +32,40 @@ public class ClienteController {
 	
 	private ClienteRepository clienteRepository;
 	private ClienteService clienteService;
+	private ClienteAssembler clienteAssembler;
 
 	@GetMapping
-	public List<Cliente> listar() {
-		return clienteRepository.findAll();
+	public List<ClienteModel> listar() {
+		return clienteAssembler.toCollectionModel(clienteRepository.findAll());
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
+	public ResponseEntity<ClienteModel> buscarPorId(@PathVariable Long id) {
 		return clienteRepository.findById(id)
-				.map(ResponseEntity::ok)
+				.map(cliente -> ResponseEntity.ok(clienteAssembler.toModel(cliente)))
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
 	@PostMapping("/salvar")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Cliente salvar(@Valid @RequestBody Cliente cliente) {
-		return clienteService.salvar(cliente);
+	public ClienteModel salvar(@Valid @RequestBody ClienteInput clienteInput) {
+		Cliente cliente = clienteAssembler.toEntity(clienteInput);
+		
+		return clienteAssembler.toModel(clienteService.salvar(cliente));
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @Valid @RequestBody Cliente cliente) {
+	public ResponseEntity<ClienteModel> atualizar(@PathVariable Long id, @Valid @RequestBody ClienteInput clienteInput) {
 		if(existePorId(id)) {
 			return ResponseEntity.notFound().build();
 		}
 		
+		Cliente cliente = clienteAssembler.toEntity(clienteInput);
 		cliente.setId(id);
-		cliente = clienteService.salvar(cliente);
 		
-		return ResponseEntity.ok(cliente);
+		Cliente clienteSalvo = clienteService.salvar(cliente);
+		
+		return ResponseEntity.ok(clienteAssembler.toModel(clienteSalvo));
 	}
 	
 	@DeleteMapping("/{id}")
