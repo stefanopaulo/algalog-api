@@ -67,6 +67,12 @@ public class Entrega {
 		setStatus(StatusEntrega.FINALIZADA);
 		setDataFinalizacao(OffsetDateTime.now());
 	}
+	
+	public void cancelar() {
+		podeSerFinalizada();
+		setStatus(StatusEntrega.CANCELADA);
+		setDataFinalizacao(OffsetDateTime.now());
+	}
 
 	private void podeSerFinalizada() {
 		if(!StatusEntrega.PENDENTE.equals(getStatus())) {

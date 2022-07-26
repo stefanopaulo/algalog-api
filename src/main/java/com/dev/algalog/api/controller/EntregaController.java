@@ -20,6 +20,7 @@ import com.dev.algalog.api.model.EntregaModel;
 import com.dev.algalog.api.model.input.EntregaInput;
 import com.dev.algalog.domain.model.Entrega;
 import com.dev.algalog.domain.repository.EntregaRepository;
+import com.dev.algalog.domain.service.CancelamentoEntregaService;
 import com.dev.algalog.domain.service.EntregaService;
 import com.dev.algalog.domain.service.FinalizacaoEntregaService;
 
@@ -34,6 +35,7 @@ public class EntregaController {
 	private EntregaService entregaService;
 	private EntregaAssembler entregaAssembler;
 	private FinalizacaoEntregaService finalizacaoEntregaService;
+	private CancelamentoEntregaService cancelamentoEntregaService;
 	
 	@GetMapping
 	public List<EntregaModel> listar() {
@@ -59,6 +61,12 @@ public class EntregaController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void finalizar(@PathVariable Long entregaId) {
 		finalizacaoEntregaService.finalizar(entregaId);
+	}
+	
+	@PutMapping("/{entregaId}/cancelamento")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void cancelar(@PathVariable Long entregaId) {
+		cancelamentoEntregaService.cancelar(entregaId);
 	}
 	
 }
